@@ -1,100 +1,70 @@
-async function login() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+// Carica le task all'avvio
+window.onload = loadTasks;
 
-    const res = await fetch("/api/login", {
+// Aggiunge un nuovo messaggio
+async function addTask() {
+    const text = document.getElementById("msgText").value.trim();
+    if (!text) return;
+
+    const res = await fetch("/api/tasks", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({email, password})
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
     });
 
-    const data = await res.json();
-    alert(data.message || data.error);
-
-    if (res.status === 200)
-        location.href = "tasks.html";
+    if (res.ok) {
+        document.getElementById("msgText").value = "";
+        loadTasks();
+    } else {
+        alert("Errore nell'aggiunta del messaggio");
+    }
 }
 
-
-async function registerUser() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    const res = await fetch("/api/register", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({email, password})
-    });
-
-    const data = await res.json();
-    alert(data.message || data.error);
-
-    if (res.status === 201)
-        location.href = "login.html";
-}
-
-
-async function logout() {
-    await fetch("/api/logout", {method: "POST"});
-    location.href = "login.html";
-}
-
-
+// Carica tutte le task
 async function loadTasks() {
-    const res = await fetch("/api/tasks");
+    const list = document.getElementById("msgList");
+    list.innerHTML = " ";
 
-    if (res.status !== 200) {
-        location.href = "login.html";
+    const res = await fetch("/api/tasks");
+    if (!res.ok) {
+        list.innerHTML = "<li>Errore nel caricamento</li>";
         return;
     }
 
     const data = await res.json();
-    const list = document.getElementById("msgList");
-    list.innerHTML = "";
 
-    data.items.forEach(t => {
+    data.tasks.forEach(msg => {
         const li = document.createElement("li");
-        li.className = t.done ? "done" : "";
+        li.textContent = msg.text;
 
-        // Testo
-        const textSpan = document.createElement("span");
-        textSpan.textContent = t.text;
+        // Permetti elim. solo se il messaggio è dell'utente
+        if (msg.isOwner) {
+            const del = document.createElement("button");
+            del.textContent = "🗑️";
+            del.className = "deleteBtn";
+            del.onclick = () => deleteTask(msg._id);
+            li.appendChild(del);
+        }
 
-        // Area icone
-        const actions = document.createElement("div");
-
-        // 🗑 icona
-        const del = document.createElement("button");
-        del.className = "icon-btn";
-        del.innerHTML = '<i class="fa-solid fa-trash" title="Elimina"></i>';
-        del.onclick = () => deleteTask(t.id);
-
-        actions.appendChild(toggle);
-        actions.appendChild(del);
-
-        li.appendChild(textSpan);
-        li.appendChild(actions);
         list.appendChild(li);
     });
 }
 
-async function addTask() {
-    const text = document.getElementById("msgText").value;
-
-    await fetch("/api/tasks", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({text})
+// Elimina il messaggio
+async function deleteTask(id) {
+    const res = await fetch("/api/tasks/" + id, {
+        method: "DELETE"
     });
 
-    loadTasks();
+    if (res.ok) {
+        loadTasks();
+    } else {
+        alert("Errore nell'eliminazione");
+    }
 }
 
-
-async function deleteTask(id) {
-    await fetch(`/api/tasks/${id}`, {method: "DELETE"});
-    loadTasks();
+// Logout
+async function logout() {
+    await fetch("/api/logout");
+    window.location.href = "/static/login.html";
 }
-
-if (location.pathname.endsWith("tasks.html"))
-    loadTasks();

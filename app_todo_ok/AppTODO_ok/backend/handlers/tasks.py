@@ -19,6 +19,7 @@ class MsgHandler(BaseHandler):
         async for t in cursor:
             out.append({
                 "id": str(t["_id"]),
+                "user_id": str(t["user_id"]),
                 "text": t["text"],
                 "date": t["date"],
                 "done": t["done"]
@@ -59,3 +60,11 @@ class MsgDeleteHandler(BaseHandler):
         })
 
         return self.write_json({"message": "Eliminato"})
+
+class MeHandler(BaseHandler):
+    async def get(self):
+        user = self.get_current_user()
+        if not user:
+            return self.write_json({"error": "Non autenticato"}, 401)
+        return self.write_json(user)
+
