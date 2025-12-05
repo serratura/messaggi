@@ -60,7 +60,7 @@ async function loadTasks() {
 
         // Mostra "utente: messaggio"
         const textSpan = document.createElement("span");
-        textSpan.textContent = `${t.owner}: ${t.text}`;
+        textSpan.textContent = `${t.owner}(${t.date}): ${t.text}`;
 
         // Area icone
         const actions = document.createElement("div");
