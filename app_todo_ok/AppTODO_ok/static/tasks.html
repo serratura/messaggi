@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <title>I miei Messaggi</title>
     <link rel="stylesheet" href="style.css">
 
-    <!-- ICONS -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
@@ -14,12 +13,18 @@
 <div class="container">
     <h2>I miei messaggi</h2>
 
-    <input id="msgText" placeholder="Nuovo msg...">
+    <input id="msgText" placeholder="Nuovo messaggio...">
     <button onclick="addTask()">➕ Aggiungi</button>
+
+    <div class="filters">
+        <input id="search-text" placeholder="Cerca nel testo" oninput="paginaCorrente=1; aggiornaVista()">
+        <input id="search-user" placeholder="Cerca per utente" oninput="paginaCorrente=1; aggiornaVista()">
+    </div>
 
     <ul id="msgList"></ul>
 
-    <button onclick="logout()" class="logout">Logout</button>
+    <div id="pagination"></div>
+    <div id="pagina-info"></div>
 </div>
 
 <script src="js/app.js"></script>
